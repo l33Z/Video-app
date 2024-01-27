@@ -1,14 +1,20 @@
-import { Button } from '@/components/ui/button'
-import ThemeModeToggle from './components/theme-mode-toggle'
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
+import Home from '@/pages/home/home'
+import Navbar from '@/components/navbar'
+import { Toaster } from '@/components/ui/sonner'
+import { ROUTE_NAMES } from '@/utils/constants'
+import Room from '@/pages/room/room'
 
 export default function App() {
   return (
-    <div>
-      <h1>2331</h1>
-      <Button variant='outline'>Button</Button>
-      <div>
-        <ThemeModeToggle />
-      </div>
-    </div>
+    <>
+      <Toaster position='top-right' richColors={true} />
+      <Router>
+        <Routes>
+          <Route exact path={ROUTE_NAMES.HOME} element={<Home />} />
+          <Route exact path={ROUTE_NAMES.ROOM} element={<Room />} />
+        </Routes>
+      </Router>
+    </>
   )
 }
