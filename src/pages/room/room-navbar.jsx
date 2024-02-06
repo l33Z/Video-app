@@ -17,7 +17,7 @@ const RoomNavbar = () => {
         <div className='flex items-center '>
           <Popover>
             <PopoverTrigger>
-              <Button onClick={() => {}} toolTipText={'Info'} variant='link' size='icon'>
+              <Button onClick={() => {}} tooltiptext={'Info'} variant='link' size='icon'>
                 <Info size={18} />
               </Button>
             </PopoverTrigger>
@@ -46,7 +46,7 @@ const RoomNavbar = () => {
 
         <div className='flex items-center'>
           <MinimalCallActionBtn
-            toolTipText={'Settings'}
+            tooltiptext={'Settings'}
             size='icon'
             className='ml-0 mx-3'
             onClick={() => {

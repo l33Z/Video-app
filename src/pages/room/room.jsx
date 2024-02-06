@@ -1,36 +1,77 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import CallBottomBar from '@/pages/room/call-bottom-bar'
-
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
-import { DailyVideo, useDaily, useLocalParticipant, useLocalSessionId, useParticipant } from '@daily-co/daily-react'
-import { ROUTE_NAMES } from '@/utils/constants'
+import { useDaily, useLocalParticipant, useParticipantIds, useScreenShare } from '@daily-co/daily-react'
+import { MEETING_STATES } from '@/utils/constants'
 import RoomNavbar from '@/pages/room/room-navbar'
+import { useParams } from 'react-router-dom'
+import { GetStartedModal } from '../home/get-started-modal'
+import { RoomErrorComp } from './room-common-error'
+import TwoParticipnates from '@/pages/room/screen-layoutes/two-users'
+import TwoParticipnatesScreenShare from '@/pages/room/screen-layoutes/two-users-screen-share'
+import Loading from '@/components/loading'
 
 const Room = () => {
+  const params = useParams()
+
+  const [meetingState, setMeetingState] = useState(MEETING_STATES.INTIAL)
+
+  console.log('params ==> ', params)
+
   const dailyCallObj = useDaily()
   const localParticipant = useLocalParticipant()
   console.log('localParticipant ==> ', localParticipant)
+
   const [participantsList, setParticipantsList] = useState({})
 
   const allParty = dailyCallObj.participants()
   console.log('allParty ==> ', allParty)
 
-  const handleJoinRoom = async options => {
-    try {
-      const roomName = options.roomName
-      console.log('Options ==> ', options)
-      delete options.roomName
-      const d = await dailyCallObj.join(options)
-      console.log('ddd ==> ', d)
-      navigate(ROUTE_NAMES.ROOM.replace(':roomId', roomName))
-    } catch (err) {
-      const msg = err.message ?? err ?? 'Something went wrong'
-      console.log('err ==> ', err)
-      toast.error(msg)
-    }
-  }
+  const allPrticipantesIds = useParticipantIds()
 
-  useEffect(() => {}, [])
+  useEffect(() => {
+    let newParticipantes = []
+
+    console.log('erererrerer')
+
+    Object.keys(allParty).forEach(key => {
+      console.log('zzzz key ==> ', key)
+      console.log('zzzz allParty[key] ==> ', allParty[key])
+
+      newParticipantes.push(allParty[key])
+    })
+
+    setParticipantsList(newParticipantes)
+  }, [dailyCallObj, allParty])
+
+  const newPartyList = useMemo(() => {
+    let newParticipantes = []
+
+    console.log('erererrererzzzz')
+
+    Object.keys(allParty).forEach(key => {
+      console.log('zzzz key zzz==> ', key)
+      console.log('zzzz allParty[key] zzz==> ', allParty[key])
+
+      newParticipantes.push(allParty[key])
+    })
+
+    return newParticipantes
+  }, [dailyCallObj, allParty])
+
+  console.log('newPartyList ===> ', newPartyList)
+
+  useEffect(() => {
+    if (params.roomId) {
+      setMeetingState(MEETING_STATES.INTIAL)
+    }
+  }, [])
+
+  const remoteKeys = useMemo(() => {
+    console.log('Keys ==> ', Object.keys(allParty))
+    return Object.keys(allParty).filter(key => key !== 'local')
+  }, [allParty])
+
+  console.log('remoteKeys ==> ', remoteKeys)
 
   // const handleJoinedMeeting = (e) => {
   //     console.log('handleJoinedMeeting ===> ', e);
@@ -131,21 +172,28 @@ const Room = () => {
   //     addDailyEvents()
   // }, [])
 
+  console.warn('participantsList ==> ', participantsList)
+  console.warn('allPrticipantesIds ==> ', allPrticipantesIds)
+
+  const { screens } = useScreenShare()
+
+  console.warn('screens ==> ', screens)
+
   return (
     <div className='flex flex-col justify-center items-center'>
-      <RoomNavbar />
-      <div className='w-full min-h-[calc(100vh_-_120px)] flex flex-1'>
-        <ResizablePanelGroup direction='horizontal' className='max-w-[95%] mx-auto my-5 min-h-[calc(100vh_-_200px)] rounded-lg border'>
-          <ResizablePanel defaultSize={50} maxSize={77}>
-            <DailyVideo sessionId={localParticipant?.session_id} style={{ width: '100%', height: '100%' }} />
-          </ResizablePanel>
-          <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={50} maxSize={77}>
-            <div className='flex h-full items-center justify-center p-6'>b</div>
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </div>
-      <CallBottomBar />
+      {meetingState === MEETING_STATES.INTIAL && <GetStartedModal setMeetingState={setMeetingState} />}
+
+      {meetingState === MEETING_STATES.STARTED && allPrticipantesIds.length === 0 && <Loading />}
+
+      {meetingState === MEETING_STATES.STARTED && allPrticipantesIds.length !== 0 && (
+        <>
+          <RoomNavbar />
+          <div className='w-full min-h-[calc(100vh_-_120px)] flex flex-1'>{screens.length === 0 ? <TwoParticipnates allPrticipantesIds={allPrticipantesIds} screens={screens} /> : <TwoParticipnatesScreenShare allPrticipantesIds={allPrticipantesIds} screens={screens} />}</div>
+          <CallBottomBar />
+        </>
+      )}
+
+      {meetingState === MEETING_STATES.ERROR && <RoomErrorComp />}
     </div>
   )
 }

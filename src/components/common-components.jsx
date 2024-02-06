@@ -13,9 +13,9 @@ export const MinimalCallActionBtn = props => {
             {props.children}
           </Button>
         </TooltipTrigger>
-        {props.toolTipText && (
-          <TooltipContent className={cn('ml-5', props.toolTipClassName)}>
-            <p>{props.toolTipText}</p>
+        {props.tooltiptext && (
+          <TooltipContent className={cn('ml-5', props.tooltipclass)}>
+            <p>{props.tooltiptext}</p>
           </TooltipContent>
         )}
       </Tooltip>
@@ -23,20 +23,23 @@ export const MinimalCallActionBtn = props => {
   )
 }
 
-export const MinimalSelection = ({ id = 'z', placeholder = 'Select', title }) => {
+export const MinimalSelection = ({ value, onValueChange, id = 'z', placeholder = 'Select', title, options = [] }) => {
   return (
     <div className='mt-5'>
       <Label htmlFor={id} className='pb-2'>
         {title}
       </Label>
-      <Select>
+      <Select value={value} onValueChange={onValueChange}>
         <SelectTrigger className='w-full mt-1'>
           <SelectValue placeholder={placeholder} id={id} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value='light'>Light</SelectItem>
-          <SelectItem value='dark'>Dark</SelectItem>
-          <SelectItem value='system'>System</SelectItem>
+          {options.map(d => {
+            const { deviceId, label } = d.device
+            return <SelectItem value={deviceId}>{label}</SelectItem>
+          })}
+          {/* <SelectItem value='dark'>Dark</SelectItem>
+          <SelectItem value='system'>System</SelectItem> */}
         </SelectContent>
       </Select>
     </div>
