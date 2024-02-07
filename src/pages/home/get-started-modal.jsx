@@ -23,6 +23,8 @@ export function GetStartedModal({ setMeetingState }) {
   })
 
   const [userName, setUserName] = useState('')
+  const [isCameraPermissionEnable, setIsCameraPermissionEnable] = useState(false)
+  const [isAudioPermissionEnable, setIsAudioPermissionEnable] = useState(false)
 
   const handleCreateToken = () => {
     const roomName = params.roomId
@@ -38,7 +40,13 @@ export function GetStartedModal({ setMeetingState }) {
           localStorage.setItem('adminToken', data)
           setMeetingState(MEETING_STATES.STARTED)
           const url = import.meta.env.VITE_DAILY_DOMAIN_URL + roomName
-          handleJoinRoom({ token: data, url, userName })
+          handleJoinRoom({
+            token: data,
+            url,
+            userName,
+            startVideoOff: !isCameraPermissionEnable,
+            startAudioOff: !isAudioPermissionEnable,
+          })
         },
         onError: err => {
           setMeetingState(MEETING_STATES.ERROR)
@@ -63,7 +71,7 @@ export function GetStartedModal({ setMeetingState }) {
     <>
       <Dialog open={true}>
         <DialogTrigger />
-        <DialogContent className='w-[800px]'>
+        <DialogContent className='w-[800px]' isCloseIconVisible={false}>
           <DialogHeader>
             <DialogTitle>Get Started</DialogTitle>
             <DialogDescription>Anyone who has this link will be able to view this.</DialogDescription>
@@ -80,11 +88,11 @@ export function GetStartedModal({ setMeetingState }) {
 
               <div className='flex mt-5 w-full'>
                 <div className='flex items-center mr-7'>
-                  <Switch id='videoSwith' className='mr-3' />
+                  <Switch id='videoSwith' className='mr-3' checked={isCameraPermissionEnable} onCheckedChange={setIsCameraPermissionEnable} />
                   <Label htmlFor='videoSwith'>Video</Label>
                 </div>
                 <div className='flex items-center'>
-                  <Switch id='audioSwitch' className='mr-3' />
+                  <Switch id='audioSwitch' className='mr-3' checked={isAudioPermissionEnable} onCheckedChange={setIsAudioPermissionEnable} />
                   <Label htmlFor='audioSwitch'>Audio</Label>
                 </div>
               </div>
